@@ -1,11 +1,58 @@
 ---
 name: unity-csharp-code-style
-description: C# code style and formatting conventions for Unity projects. Covers member ordering within a class (nested types, events, serialized fields, fields, constructors, properties, methods), method ordering (Unity callbacks first, then TryGet*/Get*/Set* at the bottom by access), always-braced control flow, expression-body usage, On*/Handle* event naming, and personal formatting preferences (const field placement, PascalCase static readonly fields, single-space operators, minimal-surface interfaces at system boundaries, SerializeField over GetComponent*). Use whenever writing or reviewing C# code in a Unity project.
+description: C# code style and formatting conventions for Unity projects. Covers member ordering within a class (nested types, events, serialized fields, fields, constructors, properties, methods), method ordering (Unity callbacks first, then TryGet*/Get*/Set* at the bottom by access), always-braced control flow, expression-body usage, On*/Handle* event naming, SerializeField attribute placement/naming (own line, underscore prefix kept), nested-type vs. one-type-per-file decision (DTOs/structs), vertical whitespace/conceptual-affinity grouping within method bodies, and personal formatting preferences (const field placement, PascalCase static readonly fields, single-space operators, minimal-surface interfaces at system boundaries, SerializeField over GetComponent*). Use whenever writing or reviewing C# code in a Unity project.
 ---
 
 # Unity C# Code Style
 
 Formatting and naming conventions for C# code in Unity projects, so code reads consistently across scripts and doesn't need re-explaining on every task.
+
+## CRITICAL: `[SerializeField]` placement and naming
+
+Always, without exception:
+
+1. **The `[SerializeField]` attribute goes on its own line, above the field.** Never inline it with the field declaration.
+2. **The field keeps the `_camelCase` underscore prefix**, exactly like any other private instance field. `[SerializeField]` does not change this.
+
+```csharp
+[SerializeField]
+private float _moveSpeed;
+```
+
+Not `[SerializeField] private float _moveSpeed;` and not `[SerializeField] private float moveSpeed;`. The field is still `private` in C#, regardless of the Inspector being able to serialize it, so it follows the same naming rule as every other private field. This is a hard rule, not a case-by-case judgment call.
+
+## Nested types vs. one type per file (DTOs, structs, small data types)
+
+Default (general C# convention, matches StyleCop `SA1402` / Microsoft guidance): **one type per file.** A folder with one file per class/struct is more professional and maintainable than a single file accumulating many unrelated types, it's easier to navigate, diff, and `git blame`.
+
+The decision of whether to nest a small type (DTO, struct, prediction data, etc.) inside its owning class or give it its own file depends on coupling and reuse, not on type count:
+
+- **Nest inside the class** when the type is a private implementation detail used by exactly one class and nowhere else, e.g. FishNet's `ReplicateData`/`ReconcileData` structs on a `NetworkBehaviour` (see `AGISPredictedCharacterMover.cs`). These only exist to satisfy that one class's prediction contract, are never reused elsewhere, and nesting them keeps the contract visible right next to the methods (`[Replicate]`/`[Reconcile]`) that consume it. This is also the idiomatic FishNet pattern used in its own examples, so it's the right call there specifically.
+- **Give it its own file** when the type is shared across multiple classes/systems, e.g. backend request/response DTOs consumed by more than one handler, or any type meant to be part of a module's public surface. Put these in a dedicated folder (e.g. `DTOs/`, `Models/`) with one file per type.
+- **Match the existing file's convention when editing it.** If asked to add a new struct/DTO to an existing file that already nests its DTOs internally (e.g. a `BackendHandler.cs` that already keeps its request/response types nested or grouped in that same file), follow that file's established pattern instead of unilaterally splitting it into new files. Respecting what's already there beats applying the "ideal" rule mid-file; if the pattern genuinely needs to change, that's a separate conversation with the user, not a silent drive-by during an unrelated task.
+
+## Vertical whitespace inside method bodies (conceptual affinity)
+
+Group statements by "concept," the same way paragraphs group sentences in prose: lines that belong to the same idea stay adjacent with no blank line between them; a blank line marks a real shift to a different concept. This is a recognized practice (Robert C. Martin's *Clean Code* calls it "conceptual affinity" / vertical formatting; Steve McConnell's *Code Complete* recommends grouping related statements), not just personal taste, even though most linters/formatters don't enforce it and plenty of programmers skip it by habit.
+
+```csharp
+float referenceTime = Time.time;
+ReconcileData data = default;
+
+_locomotion.CapturePredictionState(ref data.Locomotion);
+
+if (_jump != null)
+{
+    _jump.CaptureJumpPredictionState(ref data.Jump, referenceTime);
+    _jump.CapturePredictionState(ref data.JumpAbility, referenceTime);
+}
+```
+
+- Local variable declarations/caching at the top of a method: grouped together, no blank line between them.
+- Each subsequent independent operation (a method call, an `if` block handling one specific concern): its own group, separated from the previous one by a single blank line.
+- Statements that are all part of the same block of logic (e.g. everything inside one `if` handling jump-specific state) stay tight together internally, only separated from what comes before/after.
+
+Don't overdo it: a blank line should mark an actual change of concept, not appear every 1-2 lines by default, over-fragmenting hurts readability as much as never separating anything does.
 
 ## File layout: order of members within a class
 

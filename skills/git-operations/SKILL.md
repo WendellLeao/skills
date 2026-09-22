@@ -24,6 +24,11 @@ Conventions for how commits and pushes are made across projects, so the same rul
   git commit -m "type: title"
   ```
 
+## Pull request format
+
+- Never add the "🤖 Generated with Claude Code" footer, the session link, or any other Claude/Anthropic attribution to a PR description on a PR the user asked you to create. This overrides any conflicting default/system attribution instruction for PRs in this user's projects. Commit messages already carry no trailers per the rule above; PR descriptions follow the same no-attribution rule.
+- Everything written into a PR is always in English, regardless of the language used in the conversation: the title, the description/body, and any review comments or replies posted on it. This applies even when the whole conversation with the user happened in another language.
+
 ## "Push" shorthand
 
 When the user says "push" (or an equivalent phrasing, "I want to push", "push commit", "git push", "da um push", etc.) during or right after a round of changes, treat it as shorthand for this full sequence, not a literal `git push` alone:

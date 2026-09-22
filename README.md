@@ -27,11 +27,11 @@ Behavioral guidelines for writing, editing, and reviewing Unity C# code to reduc
 
 ### [`unity-csharp-code-style`](skills/unity-csharp-code-style/SKILL.md)
 
-C# formatting and naming conventions for Unity projects: member ordering within a class, method ordering (Unity callbacks first, then `TryGet*`/`Get*`/`Set*` at the bottom), brace and expression-body rules, `On*`/`Handle*` event naming, and formatting preferences like const field placement, static readonly naming, and preferring `[SerializeField]` over `GetComponent*`.
+C# formatting and naming conventions for Unity projects: member ordering within a class, method ordering (Unity callbacks first, then `TryGet*`/`Get*`/`Set*` at the bottom), brace and expression-body rules, `On*`/`Handle*` event naming, `[SerializeField]` attribute placement and naming, nested-type vs. one-type-per-file decisions for DTOs/structs, vertical whitespace grouping within method bodies, and formatting preferences like const field placement, static readonly naming, and preferring `[SerializeField]` over `GetComponent*`.
 
 ### [`git-operations`](skills/git-operations/SKILL.md)
 
-Git commit and push conventions used across projects, not specific to Unity: conventional-commit-style message tags (`feat:`, `fix:`, `refactor:`, etc.), title-only commit messages with no body or trailers, and a "push" shorthand that scopes staging to only the files/hunks touched in the current conversation before committing and pushing.
+Git commit and push conventions used across projects, not specific to Unity: conventional-commit-style message tags (`feat:`, `fix:`, `refactor:`, etc.), title-only commit messages with no body or trailers, a "push" shorthand that scopes staging to only the files/hunks touched in the current conversation before committing and pushing, and PR description conventions (English-only, no Claude/Anthropic attribution).
 
 ## License
 
