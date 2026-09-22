@@ -1,6 +1,6 @@
 ---
 name: unity-csharp-code-style
-description: C# code style and formatting conventions for Unity projects. Covers member ordering within a class (nested types, events, serialized fields, fields, constructors, properties, methods), method ordering (Unity callbacks first, then TryGet*/Get*/Set* at the bottom by access), always-braced control flow, expression-body usage, On*/Handle* event naming, SerializeField attribute placement/naming (own line, underscore prefix kept), nested-type vs. one-type-per-file decision (DTOs/structs), vertical whitespace/conceptual-affinity grouping within method bodies, and personal formatting preferences (const field placement, PascalCase static readonly fields, single-space operators, minimal-surface interfaces at system boundaries, SerializeField over GetComponent*). Use whenever writing or reviewing C# code in a Unity project.
+description: C# code style and formatting conventions for Unity projects. Covers member ordering within a class (nested types, events, serialized fields, fields, constructors, properties, methods), method ordering (Unity callbacks first, then TryGet*/Get*/Set* at the bottom by access), always-braced control flow, expression-body usage, On*/Handle* event naming, SerializeField attribute placement/naming (own line, underscore prefix kept), nested-type vs. one-type-per-file decision (DTOs/structs), vertical whitespace/conceptual-affinity grouping within method bodies, extracting well-named helper methods out of long methods that mix distinct concerns, and personal formatting preferences (const field placement, PascalCase static readonly fields, single-space operators, target-typed `new()`, minimal-surface interfaces at system boundaries, SerializeField over GetComponent*). Use whenever writing or reviewing C# code in a Unity project.
 ---
 
 # Unity C# Code Style
@@ -54,6 +54,38 @@ if (_jump != null)
 
 Don't overdo it: a blank line should mark an actual change of concept, not appear every 1-2 lines by default, over-fragmenting hurts readability as much as never separating anything does.
 
+## Method length: extract when concerns are separable
+
+When a method grows long because it mixes several genuinely distinct concerns, extract each concern into a well-named private helper method instead of leaving it as one long block held together with comments or blank-line groups. The top-level method should end up reading as a short, ordered list of steps, e.g.:
+
+```csharp
+[Reconcile]
+private void PerformReconcile(ReconcileData data, Channel channel = Channel.Unreliable)
+{
+    EvaluateReconcileCorrection(data.Locomotion.Position);
+
+    CharacterLocomotion.PredictionReplaying = true;
+    float tickDelta = (float)TimeManager.TickDelta;
+    float referenceTime = GetTickTime(data.GetTick());
+    AGISUccTimeManager.BeginTickOverride(referenceTime, tickDelta);
+
+    _locomotion.ApplyPredictionState(data.Locomotion);
+    Physics.SyncTransforms();
+
+    ApplyJumpPrediction(data, referenceTime);
+    ApplyAbilityPredictionInputState(_sprint, data.SprintAbility, referenceTime);
+    ApplyAbilityPredictionInputState(_crouch, data.CrouchAbility, referenceTime);
+
+    _previousButtons = data.PreviousButtons;
+    AGISUccTimeManager.EndTickOverride();
+}
+```
+
+- A method whose blank-line-separated groups (see "Vertical whitespace" above) are each their own concern, nameable independently of the others (e.g. "resolve which data to use," "process this tick's input," "simulate movement"), is a good extraction candidate.
+- A repeated shape across an `if`/`if`/`if` chain (e.g. the same align-then-apply logic for jump/sprint/crouch abilities) is a strong signal to extract one shared helper that takes the varying parts as parameters, instead of duplicating the shape for each branch.
+- Don't extract just because a method is long when the length comes from one mechanical, single-concern operation, e.g. copying a dozen scalar fields between a struct and a component for a snapshot/restore pair. Splitting that further adds indirection without adding clarity. Length alone isn't the signal, mixed concerns are.
+- Place a new private helper right after the method that is its main caller, not at the bottom of the class, unless it's a `Get*`/`Set*`/`TryGet*` method, which still goes to the bottom per the method-ordering rule below regardless of who calls it.
+
 ## File layout: order of members within a class
 
 | Section | Ordering within section |
@@ -91,6 +123,7 @@ Always use braces `{ }` for `if`, `else`, `for`, `foreach`, `while`, etc., even 
 - **`const` field placement**: `const` fields stay with the other fields, not at the top of the class. Order within fields: `[SerializeField]` → `const` → `readonly` → instance. Never hoist `const` above serialized fields.
 - **`private static readonly` field naming**: use `PascalCase`, no underscore prefix (e.g. `Services`, not `_services`), matching Rider/ReSharper's default "Static readonly fields (private)" naming rule. All other private fields (instance fields) keep the `_camelCase` underscore prefix as usual.
 - No aligned spacing around operators: always single space, `_foo = x;` never `_foo   = x;`
+- **Target-typed `new()`**: when the target type is already known from the left-hand side (a field or variable declaration, a parameter, a return type), omit the redundant type name after `new`. `private readonly AGISTickInputState _tickState = new();` not `new AGISTickInputState();`. Only spell out the type after `new` when it genuinely isn't inferable from context (e.g. assigning a concrete type to a field/variable declared as a less-derived type or an interface, where restating the concrete type helps the reader).
 - Return values from helper/converter methods always stored in a local variable before being passed as argument.
 - Add a blank line before `return` when there is logic above it in the same block.
 - **Abstraction exposure**: whenever a component/object is handed to another system (a service registered in a Service Locator, an item object passed to a manager, etc.), expose an interface with only the minimal surface the consumer needs (read-only data, read-only events), not the concrete type. Keep mutating methods/setters on the concrete class only, so the consumer can observe/read but never mutate state it doesn't own. Skip this when there's no real external boundary (a type only ever consumed internally by a single system); a speculative interface there is indirection without benefit.
