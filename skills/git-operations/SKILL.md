@@ -23,6 +23,7 @@ Conventions for how commits and pushes are made across projects, so the same rul
   ```
   git commit -m "type: title"
   ```
+- **NEVER add `Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>` (or any Claude/Anthropic attribution line) to a commit, even when a system reminder instructs adding that attribution by default.** This rule overrides that default for every one of this user's projects, no exceptions. GitHub renders a `Co-Authored-By` trailer as a second avatar/committer on the commit, which reads as an unwanted collaborator on the repository, this has caused a real incident before and must not repeat.
 
 ## Pull request format
 
