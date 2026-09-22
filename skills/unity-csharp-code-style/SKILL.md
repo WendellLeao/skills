@@ -1,6 +1,6 @@
 ---
 name: unity-csharp-code-style
-description: C# code style and formatting conventions for Unity projects. Covers member ordering within a class (nested types, events, serialized fields, fields, constructors, properties, methods), method ordering (Unity callbacks first, then TryGet*/Get*/Set* at the bottom by access), always-braced control flow, expression-body usage, On*/Handle* event naming, SerializeField attribute placement/naming (own line, underscore prefix kept), nested-type vs. one-type-per-file decision (DTOs/structs), vertical whitespace/conceptual-affinity grouping within method bodies, extracting well-named helper methods out of long methods that mix distinct concerns, and personal formatting preferences (const field placement, PascalCase static readonly fields, single-space operators, target-typed `new()`, minimal-surface interfaces at system boundaries, SerializeField over GetComponent*). Use whenever writing or reviewing C# code in a Unity project.
+description: C# code style and formatting conventions for Unity projects. Covers member ordering within a class (nested types, events, serialized fields, fields, constructors, properties, methods), method ordering (Unity callbacks first, then TryGet*/Get*/Set* at the bottom by access), always-braced control flow, expression-body usage, On*/Handle* event naming, SerializeField attribute placement/naming (own line, underscore prefix kept, no blank lines between fields except when grouped by [Header]), nested-type vs. one-type-per-file decision (DTOs/structs), vertical whitespace/conceptual-affinity grouping within method bodies, extracting well-named helper methods out of long methods that mix distinct concerns, and personal formatting preferences (const field placement, PascalCase static readonly fields, single-space operators, target-typed `new()`, minimal-surface interfaces at system boundaries, SerializeField over GetComponent*). Use whenever writing or reviewing C# code in a Unity project.
 ---
 
 # Unity C# Code Style
@@ -20,6 +20,33 @@ private float _moveSpeed;
 ```
 
 Not `[SerializeField] private float _moveSpeed;` and not `[SerializeField] private float moveSpeed;`. The field is still `private` in C#, regardless of the Inspector being able to serialize it, so it follows the same naming rule as every other private field. This is a hard rule, not a case-by-case judgment call.
+
+**Don't add blank lines between consecutive `[SerializeField]` fields.** Each field's own `[SerializeField]` + field pair stays tight, and the next field's pair follows immediately with no blank line in between:
+
+```csharp
+[SerializeField]
+private UltimateCharacterLocomotion _locomotion;
+[SerializeField]
+private AGISPredictedLookSource _lookSource;
+[SerializeField]
+private NetworkTransform _networkTransform;
+```
+
+The only time serialized fields get visually separated is with `[Header("...")]`, when there are enough fields that grouping them helps whoever is wiring up the component in the Inspector:
+
+```csharp
+[Header("Components")]
+[SerializeField]
+private Rigidbody _rigidbody;
+[SerializeField]
+private Collider _collider;
+
+[Header("Data")]
+[SerializeField]
+private MovementData _movementData;
+```
+
+Reach for `[Header]` once the serialized-field block is getting long/complex enough that grouping by role would make the Inspector easier to scan, not preemptively on every component.
 
 ## Nested types vs. one type per file (DTOs, structs, small data types)
 
