@@ -1,6 +1,6 @@
 ---
 name: unity-engine-guidelines
-description: Behavioral engineering guidelines for writing, editing, and reviewing Unity C# code, to reduce common LLM coding mistakes. Covers surfacing assumptions and tradeoffs before coding, defaulting to garbage-free and SerializeField-wired code, making only surgical changes, working toward verifiable goals, respecting the MonoBehaviour lifecycle and Unity 6 stable APIs, never hand-editing serialized asset files outside the Editor, pairing every event subscription with an unsubscription, and blending changes into existing code without leaving a trace. Use whenever writing, editing, or reviewing Unity/C# code in any project.
+description: Behavioral engineering guidelines for writing, editing, and reviewing Unity C# code, to reduce common LLM coding mistakes. Covers surfacing assumptions and tradeoffs before coding, defaulting to garbage-free and SerializeField-wired code (with the full rationale for SerializeField over GetComponent*), making only surgical changes, working toward verifiable goals, respecting the MonoBehaviour lifecycle and Unity 6 stable APIs, never hand-editing serialized asset files outside the Editor, pairing every event subscription with an unsubscription, blending changes into existing code without leaving a trace, and exposing only minimal-surface interfaces at system boundaries. Use whenever writing, editing, or reviewing Unity/C# code in any project.
 ---
 
 # Unity Engine Guidelines
@@ -18,7 +18,7 @@ Behavioral guidelines to reduce common LLM coding mistakes in Unity projects. Bi
 *Minimum code that solves the problem. Nothing speculative.*
 - No speculative abstractions. If it's not used, it doesn't get written.
 - Performance: Default to garbage-free code. In hot paths (`Update`, per-frame loops), `foreach` over a concrete `List<T>` or array does not allocate, since the enumerator is a struct. The real allocation risk is iterating through an interface-typed reference (`IEnumerable<T>`, `IList<T>`, etc.), which boxes the enumerator. Prefer keeping hot-path collections typed concretely (avoid boxing) over reflexively rewriting every `foreach` as `for`.
-- References: Prefer `[SerializeField]` wiring over `GetComponent`/`GetComponentInChildren` for a component's dependencies (sibling/child components, other scripts). Reserve `GetComponent*` for cases where the dependency truly can't be wired in the Editor. See the `unity-csharp-code-style` skill for the full rationale.
+- References: Wire a component's dependencies (sibling/child components, other scripts on the same prefab) via `[SerializeField]` fields set in the Inspector, instead of resolving them at runtime with `GetComponent`/`GetComponentInChildren` in `Awake`. Gameplay objects are encapsulated as self-contained prefabs, so there's no scenario where a dependency needs to be "discovered" dynamically, it's fixed at prefab-edit time. Serialized fields also make a component's dependencies visible just by looking at it in the Inspector, and an unwired reference shows up as an obvious "None" instead of failing silently at runtime. Since the reference is a required prefab-wiring dependency, skip null checks on it too (a missing wire is a prefab configuration bug, not a runtime case to guard against). Reserve `GetComponent*` for cases where the dependency truly can't be wired in the Editor.
 - Serialization: Respect `[SerializeField]`. Keep state private. Do not suggest public fields for internal state.
 - If you write 100 lines and it could be 40, rewrite it.
 
@@ -60,3 +60,9 @@ Behavioral guidelines to reduce common LLM coding mistakes in Unity projects. Bi
 - Keep the footprint minimal: mirror how nearby code already solves similar problems (reference caching, event-handling shape, logging style, etc.) instead of introducing a new pattern.
 - Exception: if the surrounding code you're touching is itself buggy or poorly written, fix it rather than replicating the defect, but flag that fix to the user.
 - **Do not add code comments by default**, even to explain a non-obvious "why" behind a fix. Only add comments when the script being touched is already comment-heavy, or is genuinely very complex. Match the file's existing comment density before adding one, the same way you match its style, naming, and formatting. A comment-free file that suddenly gets new comment blocks reads as out of place, breaking the "no trace" rule above, no matter how justified the comment would be in isolation.
+
+## 9. Abstraction Exposure at System Boundaries
+*Expose only what the consumer needs, never the whole object.*
+- Whenever a component/object is handed to another system (a service registered in a Service Locator, an item object passed to a manager, etc.), expose an interface with only the minimal surface the consumer needs (read-only data, read-only events), not the concrete type.
+- Keep mutating methods/setters on the concrete class only, so the consumer can observe/read but never mutate state it doesn't own.
+- Skip this when there's no real external boundary (a type only ever consumed internally by a single system); a speculative interface there is indirection without benefit, see "No speculative abstractions" above.
