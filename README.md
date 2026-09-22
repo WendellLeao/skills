@@ -1,15 +1,18 @@
 # Skills
 
-A collection of [Claude Code Skills](https://docs.claude.com/en/docs/claude-code/skills) that codify how I want an AI coding agent to work in specific domains, so the decisions don't have to be re-explained every time and any teammate can adopt the same conventions by installing the same skill.
+My global AI coding agent setup: a top-level [`CLAUDE.md`](CLAUDE.md) with cross-project instructions, an [`AGENTS.md`](AGENTS.md) pointer for non-Claude agents, and a collection of [Claude Code Skills](https://docs.claude.com/en/docs/claude-code/skills) that codify how I want an agent to work in specific domains, so the decisions don't have to be re-explained every time and the same setup can be installed on any device.
 
 ## Installation
 
-Each folder under `skills/` is one skill. To install a skill, copy its folder into your own `~/.claude/skills/` directory:
+- **`CLAUDE.md`**: copy to `~/.claude/CLAUDE.md` for it to apply globally across all your projects with Claude Code.
+- **`RTK.md`**: referenced from `CLAUDE.md` via `@RTK.md`; copy alongside it to `~/.claude/RTK.md`. It documents [rtk](https://github.com/rtk-ai/rtk), a CLI proxy this setup optionally hooks into to cut token usage on common dev commands. Skip it if you don't use `rtk`, just drop the `@RTK.md` line from your local `CLAUDE.md` copy.
+- **`AGENTS.md`**: for agents other than Claude Code (Cursor, Codex, etc.) that read `AGENTS.md` by convention; copy to the root of a project if you want that agent to pick up the same `CLAUDE.md` instructions there.
+- **Skills**: each folder under `skills/` is one skill. To install a skill, copy its folder into your own `~/.claude/skills/` directory:
 
-```
-git clone https://github.com/WendellLeao/skills.git
-cp -r skills/skills/unity-clean-architecture ~/.claude/skills/
-```
+  ```
+  git clone https://github.com/WendellLeao/skills.git
+  cp -r skills/skills/unity-clean-architecture ~/.claude/skills/
+  ```
 
 Claude Code discovers skills from the current project or your global `~/.claude/skills/` directory and triggers them automatically based on the `description` in each skill's frontmatter, no manual invocation needed.
 
