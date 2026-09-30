@@ -1,12 +1,14 @@
 # Skills
 
-My global AI coding agent setup: a top-level [`CLAUDE.md`](CLAUDE.md) with cross-project instructions, an [`AGENTS.md`](AGENTS.md) pointer for non-Claude agents, and a collection of [Claude Code Skills](https://docs.claude.com/en/docs/claude-code/skills) that codify how I want an agent to work in specific domains, so the decisions don't have to be re-explained every time and the same setup can be installed on any device.
+My global AI coding agent setup: a top-level [`AGENTS.md`](AGENTS.md) with cross-project instructions, shared by every agent (Claude Code, Codex, etc.), and a collection of [Claude Code Skills](https://docs.claude.com/en/docs/claude-code/skills) that codify how I want an agent to work in specific domains, so the decisions don't have to be re-explained every time and the same setup can be installed on any device.
 
 ## Installation
 
-- **`CLAUDE.md`**: copy to `~/.claude/CLAUDE.md` for it to apply globally across all your projects with Claude Code.
-- **`RTK.md`**: referenced from `CLAUDE.md` via `@RTK.md`; copy alongside it to `~/.claude/RTK.md`. It documents [rtk](https://github.com/rtk-ai/rtk), a CLI proxy this setup optionally hooks into to cut token usage on common dev commands. Skip it if you don't use `rtk`, just drop the `@RTK.md` line from your local `CLAUDE.md` copy.
-- **`AGENTS.md`**: for agents other than Claude Code (Cursor, Codex, etc.) that read `AGENTS.md` by convention; copy to the root of a project if you want that agent to pick up the same `CLAUDE.md` instructions there.
+- **`AGENTS.md`**: the single source of truth for the global instructions. Install it per agent:
+  - **Claude Code**: copy to `~/.claude/CLAUDE.md` for it to apply globally across all your projects.
+  - **Codex**: copy to `~/.codex/AGENTS.md`.
+  - **Other agents** (Cursor, etc.) that read `AGENTS.md` by convention: copy it to the root of a project.
+- **`RTK.md`**: referenced from `AGENTS.md` via `@RTK.md`; copy alongside it to `~/.claude/RTK.md`. It documents [rtk](https://github.com/rtk-ai/rtk), a CLI proxy this setup optionally hooks into to cut token usage on common dev commands. Skip it if you don't use `rtk`, just drop the `@RTK.md` line from your local copy. The `@` import is a Claude Code feature, so agents that don't expand it (like Codex) see that line as plain text.
 - **Skills**: each folder under `skills/` is one skill. To install a skill, copy its folder into your own `~/.claude/skills/` directory:
 
   ```
