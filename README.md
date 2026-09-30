@@ -8,7 +8,6 @@ My global AI coding agent setup: a top-level [`AGENTS.md`](AGENTS.md) with cross
   - **Claude Code**: copy to `~/.claude/CLAUDE.md` for it to apply globally across all your projects.
   - **Codex**: copy to `~/.codex/AGENTS.md`.
   - **Other agents** (Cursor, etc.) that read `AGENTS.md` by convention: copy it to the root of a project.
-- **`RTK.md`**: referenced from `AGENTS.md` via `@RTK.md`; copy alongside it to `~/.claude/RTK.md`. It documents [rtk](https://github.com/rtk-ai/rtk), a CLI proxy this setup optionally hooks into to cut token usage on common dev commands. Skip it if you don't use `rtk`, just drop the `@RTK.md` line from your local copy. The `@` import is a Claude Code feature, so agents that don't expand it (like Codex) see that line as plain text.
 - **Skills**: each folder under `skills/` is one skill. To install a skill, copy its folder into your own `~/.claude/skills/` directory:
 
   ```

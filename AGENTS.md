@@ -59,8 +59,6 @@ Invoke the `git-operations` skill for the full rules whenever creating a git com
 
 ## Skills & AGENTS.md Repository Sync
 
-This file, the skills it references, and `RTK.md` are also tracked in the `WendellLeao/skills` GitHub repository, so the same setup can be installed on any device.
+This file and the skills it references are also tracked in the `WendellLeao/skills` GitHub repository, so the same setup can be installed on any device.
 
 Whenever asked to modify this `AGENTS.md` file (or its installed copies at `~/.claude/CLAUDE.md` and `~/.codex/AGENTS.md`) or any skill under `~/.claude/skills/`, after making the local change, ask the user whether they also want it pushed to that repository. Never push automatically. Only push when the user explicitly confirms, for that specific change.
-
-@RTK.md
