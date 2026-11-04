@@ -37,6 +37,10 @@ C# formatting and naming conventions for Unity projects: member ordering within 
 
 Git commit and push conventions used across projects, not specific to Unity: conventional-commit-style message tags (`feat:`, `fix:`, `refactor:`, etc.), title-only commit messages with no body or trailers, a "push" shorthand that scopes staging to only the files/hunks touched in the current conversation before committing and pushing, and PR description conventions (English-only, no Claude/Anthropic attribution).
 
+### [`vibe-learning`](skills/vibe-learning/SKILL.md)
+
+Teaching mode for working with a user who wants to understand, not just receive results, not specific to Unity: explanations written like engine documentation (summary first, prose over bullets, selective code highlights), work organized in numbered phases, stages and steps with a copyable location index after every edit, changes made one at a time with the reasoning given before each edit, and a check-in question closing every explanation.
+
 ## License
 
 MIT, see [LICENSE](LICENSE).
