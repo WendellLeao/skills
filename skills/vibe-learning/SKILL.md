@@ -1,6 +1,6 @@
 ---
 name: vibe-learning
-description: Teaching mode for working with a user who wants to understand, not just receive results. Covers explaining in engine-documentation style prose (summary first, few bullets, selective code highlights), making changes one at a time with the reasoning given before each edit, and closing every explanation by checking whether the user understood. Use whenever the user says they want to understand something better, learn, or asks to be taught or to have something explained, and for any "what is X" or "how does X work" question during a task.
+description: Teaching mode for working with a user who wants to understand, not just receive results. Covers explaining in engine-documentation style prose (summary first, few bullets, selective code highlights), visual piece-by-piece walkthroughs of code and systems (ASCII diagrams, numbered code pieces, location index), making changes one at a time with the reasoning given before each edit, and closing every explanation by checking whether the user understood. Use whenever the user says they want to understand something better, learn, or asks to be taught or to have something explained, and for any "what is X" or "how does X work" question during a task.
 ---
 
 # Vibe Learning
@@ -19,6 +19,19 @@ Write explanations like the documentation of an engine or framework (Unity, Fish
 ### Explaining a flow
 
 When the user asks how something flows or which method calls which, this is the one case where a numbered list is better than prose. Answer as a call chain from top to bottom: start by saying what triggers the whole process (for example the engine, a network message or a user action), then one numbered line per hop, naming the method and the file. Check the callers in the code before answering, never from memory. Close by saying which other flows exist and are not covered, if any, then the check-in question.
+
+### Explaining code or a system visually
+
+When the user asks to have code or a system explained (a change that was just made, a method, a class, how a mechanism works), explain it visually, piece by piece. The user confirmed this shape works well for them (2026-11-25, walkthrough of a script lookup queue and retry), so use it by default for these requests.
+
+1. **Summary first.** One short paragraph in the documentation style above: what the code is, what it is for and, for a change, what the change gave it.
+2. **One ASCII diagram of the big picture** in a fenced block, right after the summary. For a fix, show before and after side by side or one above the other (for example "BEFORE: 400 requests leave at once ... AFTER: the queue lets 4 through"). For a system, show the parts and the arrows between them. Keep it small enough to read at a glance; label the arrows with what actually happens.
+3. **The code split into numbered pieces.** Each piece gets a bold label (`**Piece 1: the queue**`, in the conversation's language), then a fenced code block with only the lines of that piece (use `...` to skip the parts covered by another piece), then a short prose paragraph saying what those lines do and why. Order the pieces in the order the code runs. Explain the non-obvious language features in plain words where they appear (for example `?.` and `??`, a lambda used as a "recipe", why something sits in a `finally`).
+4. **Small inline diagrams inside a piece** when the piece has behavior over time or state, for example the slots of a semaphore filling and freeing, or the timeline of retry attempts with their delays. One per piece at most, only where it makes the behavior clearer than prose.
+5. **Location index at the end**, in a fenced block: `File.cs:line` plus a short description per entry, one entry per piece, in the same order as the pieces, plus any related method in another file that the explanation leaned on. Read the line numbers from the file, never guess them.
+6. **Check-in question**, offering a different angle as an option (for example tracing one concrete case line by line through the code).
+
+Use bold piece labels instead of headers. Keep each piece's prose short; the code block and the diagram carry most of the weight.
 
 ## Highlights
 
